@@ -1,0 +1,5 @@
+[package]
+name = "lux"
+version = "0.1.0"
+authors = ["michael@errs.io"]
+include = ["src/**/*", "Cargo.toml"]
