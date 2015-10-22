@@ -1,6 +1,7 @@
 extern crate lux;
 use lux::geom::vec3::Vec3;
 use lux::geom::ray::Ray;
+use lux::img::img::Image;
 
 fn main() {
     let a = Vec3::new(1.0, 0.0, 0.0);
