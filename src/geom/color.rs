@@ -23,7 +23,7 @@ use std::fmt;
 pub struct Color {
     r: f32,
     g: f32,
-    b: f32,
+    b: f32
 }
 
 impl Add for Color {
@@ -67,8 +67,12 @@ impl Mul<f32> for Color {
 }
 
 impl Color {
-    fn new(r: f32, g: f32, b: f32) -> Color {
+    pub fn new(r: f32, g: f32, b: f32) -> Color {
         Color {r: r, g: g, b: b}
+    }
+
+    pub fn black() -> Color {
+        Color {r: 0.0, g: 0.0, b: 0.0}
     }
 
     /*
@@ -77,7 +81,7 @@ impl Color {
      * (colors with a component greater than 1 does
      * not make sense in our natural color space.)
      */
-    fn clamp(self) -> Color {
+    pub fn clamp(self) -> Color {
         Color {r: if self.r <= 1.0 {self.r} else {1.0},
                g: if self.r <= 1.0 {self.g} else {1.0},
                b: if self.r <= 1.0 {self.b} else {1.0}}

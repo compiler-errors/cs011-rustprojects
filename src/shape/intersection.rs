@@ -6,5 +6,5 @@ pub struct Intersection {
     distance: f64,
     color: Color,
     point: Vec3,
-    norm: Vec3,
+    norm: Vec3
 }

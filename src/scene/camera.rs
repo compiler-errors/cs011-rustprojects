@@ -2,7 +2,9 @@ use geom::vec3::Vec3;
 
 /*
  * Camera is the central point in the scene from which the rays
- * are emitted.
+ * are emitted. It defines the "film" where the rays are emitted
+ * by using a field of vision measurement which calculates an
+ * effective focal distance.
  *
  * Camera::new(location, direction, up, fov)
  */
@@ -21,11 +23,11 @@ impl Camera {
      *
      * Distance is calculated by an ugly formula given in Lab 4 Advanced C++.
      */
-    fn new(location: Vec3, direction: Vec3, up: Vec3, fov: f64) -> Camera {
+    pub fn new(location: Vec3, direction: Vec3, up: Vec3, fov: f64) -> Camera {
         Camera {location: location,
                 x: direction.norm(),
                 y: (direction % up).norm(),
-                z: (y % direction).norm(),
-                distance: 0.5 / tan(fov / 2.0)}
+                z: ((direction % up) % direction).norm(),
+                distance: 0.5 / (fov / 2.0).tan()}
     }
 }

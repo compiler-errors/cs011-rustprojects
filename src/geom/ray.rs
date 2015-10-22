@@ -14,7 +14,7 @@ use geom::vec3::Vec3;
 #[derive(Debug, Copy, Clone)]
 pub struct Ray {
     origin: Vec3,
-    direction: Vec3,
+    direction: Vec3
 }
 
 /*

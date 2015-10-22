@@ -3,5 +3,5 @@ use geom::color::Color;
 
 pub struct PointLight {
     origin: Vec3,
-    color: Color,
+    color: Color
 }
