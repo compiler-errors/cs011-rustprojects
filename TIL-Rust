@@ -1,0 +1,61 @@
+Earlier
+  * The difference between Box<T> and &T:
+    I'm still not super sure about the exact usage paradigms of Box and
+    reference types in Rust. But the general thought around Box and references
+    is that there are two types of "pass-by-pointer" that we use in programming:
+    Borrowing (rights to) memory, and relinquishing (rights to) memory.
+    In borrowing, we know that we are still responsible for making sure the
+    memory eventually gets destroyed. We simply pass memory to a helper function
+    or subroutine for a temporary amount of time (which Rust makes real with its
+    concepts of named lifetimes, which I don't know anything about yet!).
+    In relinquishing memory, we completely give away our access to the memory.
+    In this way, we know that it is the responsibility of whatever method or
+    structure that now owns our memory to destroy it when the memory's
+    "lifetime" is over. The reason we cannot access this memory after relinquishing it is because we don't have any information about the lifetime of the new owner of the memory. If we had unlimited access to the newly-transferred memory, and the lifetime of the new owner "runs out", then we could be accessing dead memory (segfault!!). So Rust makes risky things more impossible to do, to the benefit and headache of the programmer (me).
+
+10/27/2015
+  * Rust has really smart type inferencing. For example, if we declare a Vec
+  (array type) without specifying its generic, the compiler will analyze future
+  usage of the Vec in order to infer what its generic type must be.
+
+    EXAMPLE:
+    // At this point, Rust doesn't know what type array: Vec<?> is.
+    // Notice that we don't even need to put a type in our "let" variable
+    // declaration.
+    let mut array = Vec::new();
+
+    // We push the integer (i32) 1 onto the array,
+    array.push(1);
+    // After this point, Rust has reason to believe that array must be of type
+    // Vec<i32>. Thus, Rust fills in the type and it is equivalent to having
+    // declared
+    // let mut array: Vec<i32> = Vec<i32>::new();
+
+  * "if let" syntactic sugar: The Option<T> type in Rust is an enumerable type
+  with two values: Some(T) and None. Functions which might return a value but
+  don't necessarily return a value are good candidates for using Option<T>. For
+  example, Ray-Shape intersection functions are a good example of functions
+  which return Option<Intersection>, since they might not return an intersection
+  at all.
+  In order to use the Option<T> type, normally we would use a "match" block to
+  handle each case of the option separately.
+
+    let k: Option<i32> = ...;
+    match k {
+      Some(t) => {
+        //Do something with the i32 value t.
+      },
+      None => {/*Do nothing.*/}
+    }
+
+  However, this syntax is a bit bulky. We don't really care about the None
+  value, only the Some value. So instead, Rust has a much more concise
+  alternative: the "if let" block.
+
+    let k: Option<i32> = ...;
+    if let Some(t) = k {
+      //Do something with the i32 value t.
+    }
+
+  This syntax essentially is a single-handle match block. It checks whether k is
+  of type Some, and if it is, it declares t to be the value contained by Some.

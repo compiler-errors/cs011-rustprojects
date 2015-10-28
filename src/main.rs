@@ -1,18 +1,22 @@
 extern crate lux;
-use lux::geom::vec3::Vec3;
-use lux::geom::ray::Ray;
-use lux::img::img::Image;
+use lux::geom::Vec3;
+use lux::geom::Ray;
+use lux::geom::Color;
+use lux::img::Image;
+use lux::shape::Sphere;
+use lux::shape::Shape;
 
 fn main() {
-    let a = Vec3::new(1.0, 0.0, 0.0);
-    let b = Vec3::new(0.0, 1.0, 0.0);
+    test_rays();
+}
 
-    print!("{} + {} = {}\n", a, b, a + b);
-    print!("{} × {} = {}\n", a, b, a % b);
-    print!("-{} = {}\n", a, -a);
-    print!("magnitude {} = {}\n", a, a.mag());
-    print!("norm {} = {}\n", (a+b), (a+b).norm());
+fn test_rays() {
+    let sphere = Sphere::new(Vec3::new(2.0, 0.0, 0.0), 1.0, Color::black());
+    let ray = Ray::between(Vec3::new(0.0, 0.0, 0.0), Vec3::new(2.0, 0.0, 0.0), true);
 
-    let c = Ray::between(a, b, true);
-    print!("{}", c);
+    if let Some(intersection) = sphere.intersect_first(ray) {
+        print!("The ray intersects at {}, which is {} far away\n", intersection.point,
+                intersection.distance);
+        print!("The normal is pointing {}\n", intersection.norm);
+    }
 }
