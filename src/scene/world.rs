@@ -32,6 +32,7 @@ impl World {
     fn get_closest_intersection(&self, ray: &Ray) -> Option<Intersection> {
         let mut distance = INFINITY;
         let mut closest: Option<Intersection> = None;
+
         for obj in self.objects.iter() {
             if let Some(intersection) = obj.intersect_first(*ray) {
                 if intersection.distance < distance {

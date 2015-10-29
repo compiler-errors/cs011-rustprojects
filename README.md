@@ -14,11 +14,11 @@ in this novel language!
 5  - Implement more shapes
   (inheritance, match)
 
-12 - Implement live visualization of scene
-  (some type of live data visualization)
-
-19 - Implement more BRDFs, transparency, reflectivity
+12 - Implement more BRDFs, transparency, reflectivity
   (ray tracing theory)
+
+19 - Implement live visualization of scene
+  (some type of live data visualization)
 
 26 - Implement/think about ways that concurrency can be introduced
   (lambdas, concurrency, concurrent memory management)

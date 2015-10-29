@@ -59,3 +59,45 @@ Earlier
 
   This syntax essentially is a single-handle match block. It checks whether k is
   of type Some, and if it is, it declares t to be the value contained by Some.
+
+10/30/2015
+  * Minimizing noise! - One Ray Tracing-related issue I ran into today was
+  tracing my shadow rays. Shadow rays are emitted from the object's intersection
+  point to a light source to see whether the object is covered by another object
+  (a shadow). What went wrong was that the Shadow ray could sometimes intersect
+  the same object that it was emitted from, leading to an odd-looking image
+  where all of the objects are speckled in black dots (fake shadows).
+    SEE: images/1-bad-shadow-rays.bmp
+
+  * Odd math functions and the power of Rust Traits - Math functions are invoked
+  a bit oddly in Rust, coming from Java, Python, or C. Instead of importing,
+  including, etc. some type of math library, and calling the trig, abs, or
+  whatever math function with your number as a parameter like "tan(pi/2)", in
+  Rust, math functions are like member functions of the datatype you're
+  calculating with!
+
+    /// Calulate the tangent of theta, but make sure it's always positive,
+    /// otherwise zero.
+    fn trig_max(theta: f64) {
+      theta.tan().max(0)
+    }
+
+  Notice that we essentially invoke the function tan() as if it were a member
+  function of our f64 data type. That's because in Rust, we can implement a
+  trait for any data type, since traits have no data types and don't affect
+  their underlying struct (e.g. we don't change f64 by implementing a trait for
+  it). For example,
+
+    impl f64 {
+      pub fn foo(self) {
+        self + 2.0
+      }
+    }
+
+    // Now we can use
+    (6.0).foo()
+    // in any of our code!
+
+  It's a really cool feature, because it allows us to do a lot of creative
+  things. I'm not exactly sure how it could be used in the best ways, but it
+  certainly opens a lot of doors.
