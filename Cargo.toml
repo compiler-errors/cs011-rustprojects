@@ -2,3 +2,8 @@
 name = "lux"
 version = "0.1.0"
 authors = ["Michael Goulet <michael@errs.io>"]
+
+[[bin]]
+doc = false
+name = "lux"
+path = "src/main.rs"
