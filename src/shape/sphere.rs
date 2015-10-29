@@ -14,6 +14,16 @@ impl Sphere {
     pub fn new(position: Vec3, radius: f64, color: Color) -> Sphere {
         Sphere {position: position, radius: radius, color: color}
     }
+
+    /// Sets the position of the Sphere.
+    fn set_position(&mut self, position: Vec3) {
+        self.position = position;
+    }
+
+    /// Gets a vector which describes the position of the Sphere.
+    fn get_position(&self) -> Vec3 {
+        self.position
+    }
 }
 
 impl Shape for Sphere {
@@ -34,7 +44,7 @@ impl Shape for Sphere {
         if t1 > 0.0 {
             let distance = (D * D) * t1;
             let point = P + D * t1;
-            let norm = (D - C).norm();
+            let norm = (point - C).norm();
             return Some(Intersection::new(distance, self.color, point, norm));
         }
 
@@ -42,7 +52,7 @@ impl Shape for Sphere {
         if t2 > 0.0 {
             let distance = (D * D) * t2;
             let point = P + D * t2;
-            let norm = (D - C).norm();
+            let norm = (point - C).norm();
             return Some(Intersection::new(distance, self.color, point, norm));
         }
 
@@ -68,7 +78,7 @@ impl Shape for Sphere {
         if t1 > 0.0 {
             let distance = (D * D) * t1;
             let point = P + D * t1;
-            let norm = (D - C).norm();
+            let norm = (point - C).norm();
             ret.push(Intersection::new(distance, self.color, point, norm));
         }
 
@@ -76,21 +86,11 @@ impl Shape for Sphere {
         if t2 > 0.0 {
             let distance = (D * D) * t2;
             let point = P + D * t2;
-            let norm = (D - C).norm();
+            let norm = (point - C).norm();
             ret.push(Intersection::new(distance, self.color, point, norm));
         }
 
         ret
-    }
-
-    /// Sets the position of the Sphere.
-    fn set_position(&mut self, position: Vec3) {
-        self.position = position;
-    }
-
-    /// Gets a vector which describes the position of the Sphere.
-    fn get_position(&self) -> Vec3 {
-        self.position
     }
 
     /// Sets the color of the Sphere.

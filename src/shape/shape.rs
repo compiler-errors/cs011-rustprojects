@@ -16,12 +16,6 @@ pub trait Shape {
     /// Returns a Vec containing all possible intersections of a Ray and a Shape.
     fn intersect_all(&self, ray: Ray) -> Vec<Intersection>;
 
-    /// Sets the position of the Shape.
-    fn set_position(&mut self, position: Vec3);
-
-    /// Gets a vector which describes the position of the Shape.
-    fn get_position(&self) -> Vec3;
-
     /// Sets the color of the Shape.
     /// (for now, Shapes are of uniform color.)
     fn set_color(&mut self, color: Color);

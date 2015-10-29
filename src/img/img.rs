@@ -51,17 +51,20 @@ impl Image {
     /// The file is saved as the filename parameter, without the .ppm
     /// file extension added onto the end.
     pub fn save(&self, filename: &str) {
-        let mut file = File::open(filename).unwrap();
+        //TODO: using unwrap is bad.
+        //TODO: check for file extension?
+        let mut file = File::create(filename).unwrap();
         write!(file, "P3\n").unwrap();
         write!(file, "{} {}\n", self.width, self.height).unwrap();
         write!(file, "255\n").unwrap();
 
-        for x in 0..self.width {
-            for y in 0..self.height {
-                let color = self.image[x as usize][y as usize];
+        for y in 0..self.height {
+            for x in 0..self.width {
+                //the i32 value for x and y need to be cast to usize
+                let color = self.image[x as usize][y as usize].clamp();
                 let r = (color.r * 255.0) as i32;
-                let g = (color.r * 255.0) as i32;
-                let b = (color.r * 255.0) as i32;
+                let g = (color.g * 255.0) as i32;
+                let b = (color.b * 255.0) as i32;
                 write!(file, "{} {} {} ", r, g, b).unwrap();
             }
             write!(file, "\n").unwrap();

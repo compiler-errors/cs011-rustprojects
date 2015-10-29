@@ -1,9 +1,7 @@
 use std::ops::*;
 use std::fmt;
 
-/// Color stores the colors emitted by objects
-/// in Lux, represented by 3 tuple components
-/// (r,g,b).
+/// Color stores the colors emitted by objects in Lux, represented by 3 tuple components (r, g, b).
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
     pub r: f32,
@@ -11,17 +9,17 @@ pub struct Color {
     pub b: f32
 }
 
+/// Prepares the vector for printing or stringifying.
 impl fmt::Display for Color {
-    /// Prepares the vector for printing or stringifying.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({}, {}, {})", self.r, self.g, self.b)
     }
 }
 
+/// Two colors can be added by-components.
 impl Add for Color {
     type Output = Color;
 
-    /// Two colors can be added by-components.
     fn add(self, other: Color) -> Color {
         Color {r: self.r + other.r,
                g: self.g + other.g,
@@ -29,10 +27,10 @@ impl Add for Color {
     }
 }
 
+/// Two colors can be subtracted by-components.
 impl Sub for Color {
     type Output = Color;
 
-    /// Two colors can be subtracted by-components.
     fn sub(self, other: Color) -> Color {
         Color {r: self.r - other.r,
                g: self.g - other.g,
@@ -40,10 +38,10 @@ impl Sub for Color {
     }
 }
 
+/// Two colors can be multiplied by-components.
 impl Mul for Color {
     type Output = Color;
 
-    /// Two colors can be multiplied by-components.
     fn mul(self, other: Color) -> Color {
         Color {r: self.r * other.r,
                g: self.g * other.g,
@@ -51,15 +49,16 @@ impl Mul for Color {
     }
 }
 
-impl Mul<f32> for Color {
+/// Multiplying a color and a scalar scales the color's components.
+impl Mul<f64> for Color {
     type Output = Color;
 
-    /// Multiplying a color and a scalar scales
-    /// the color's components.
-    fn mul(self, other: f32) -> Color {
-        Color {r: self.r * other,
-               g: self.g * other,
-               b: self.b * other}
+    fn mul(self, other: f64) -> Color {
+        //I need to cast my scaling factor to f32 because of the data type of color.
+        let scale = other as f32;
+        Color {r: self.r * scale,
+               g: self.g * scale,
+               b: self.b * scale}
     }
 }
 
