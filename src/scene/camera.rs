@@ -5,7 +5,7 @@ use geom::Color;
 use scene::World;
 use img::Image;
 
-const SAMPLES: i32 = 25;
+const SAMPLES: i32 = 4;
 
 /// Camera is the central point in the scene from which the rays are emitted.
 ///

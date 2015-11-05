@@ -23,19 +23,19 @@ fn test_world() {
     let sphere1 = Sphere::new(Vec3::new(-1.2, 0.5, 0.0), 0.5, sphere1_material);
     let sphere2_material = Rc::new(Material::lambertian(Color::new(0.0, 1.0, 0.0)));
     let sphere2 = Sphere::new(Vec3::new(0.0, 0.5, 0.0), 0.5, sphere2_material);
-    let sphere3_material = Rc::new(Material::lambertian(Color::new(0.0, 0.0, 1.0)));
-    let sphere3 = Sphere::new(Vec3::new(1.2, 0.5, 0.0), 0.5, sphere3_material);
+    let cylinder1_material = Rc::new(Material::lambertian(Color::new(0.0, 0.0, 1.0)));
+    let cylinder1 = Cylinder::new(Vec3::new(1.2, 0.01, 0.0), Vec3::new(0.0, 1.0, 0.0), 0.55, 0.75, cylinder1_material);
 
-    let light1 = DirectionLight::new(Vec3::new(0.0, -1.0, 0.0), Color::new(0.8, 0.8, 0.8));
+    let light1 = DirectionLight::new(Vec3::new(1.0, -1.0, -1.0), Color::new(0.8, 0.8, 0.8));
     let light2 = PointLight::new(Vec3::new(5.0, 3.0, 5.0), Color::new(0.3, 0.3, 0.3));
 
-    let camera = Camera::new(Vec3::new(-1.5, 1.0, 3.0), Vec3::new(-0.3, 0.5, 0.0),
+    let camera = Camera::new(Vec3::new(-1.5, 5.0, 3.0), Vec3::new(-0.3, 0.5, 0.0),
                              Vec3::new(0.0, 1.0, 0.0), FRAC_PI_3, 400, 400);
 
     world.add_shape(Box::new(plane));
     world.add_shape(Box::new(sphere1));
     world.add_shape(Box::new(sphere2));
-    world.add_shape(Box::new(sphere3));
+    world.add_shape(Box::new(cylinder1));
 
     world.add_light(Box::new(light1));
     world.add_light(Box::new(light2));

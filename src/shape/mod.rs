@@ -6,6 +6,7 @@ pub mod direction_light;
 pub mod material;
 pub mod sphere;
 pub mod plane;
+pub mod cylinder;
 
 pub use shape::shape::Shape;
 pub use shape::intersection::Intersection;
@@ -15,3 +16,4 @@ pub use shape::direction_light::DirectionLight;
 pub use shape::material::Material;
 pub use shape::sphere::Sphere;
 pub use shape::plane::Plane;
+pub use shape::cylinder::Cylinder;
