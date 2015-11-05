@@ -1,7 +1,8 @@
-use shape::intersection::Intersection;
-use geom::vec3::Vec3;
-use geom::color::Color;
-use geom::ray::Ray;
+use ::Rc;
+use shape::Intersection;
+use geom::Vec3;
+use shape::Material;
+use geom::Ray;
 
 /// Shape is the trait which all geometric shapes which interact in the scene are expected to
 /// implement.
@@ -16,10 +17,9 @@ pub trait Shape {
     /// Returns a Vec containing all possible intersections of a Ray and a Shape.
     fn intersect_all(&self, ray: Ray) -> Vec<Intersection>;
 
-    /// Sets the color of the Shape.
-    /// (for now, Shapes are of uniform color.)
-    fn set_color(&mut self, color: Color);
+    /// Sets the material of the Shape.
+    fn set_material(&mut self, material: Rc<Material>);
 
-    /// Gets the color of the Shape.
-    fn get_color(&self) -> Color;
+    /// Gets the material of the Shape.
+    fn get_material(&self) -> Rc<Material>;
 }

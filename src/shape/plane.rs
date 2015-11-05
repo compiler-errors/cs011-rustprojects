@@ -1,18 +1,20 @@
+use ::Rc;
 use geom::Vec3;
 use geom::Color;
 use geom::Ray;
 use shape::Shape;
 use shape::Intersection;
+use shape::Material;
 
 pub struct Plane {
     normal: Vec3,
     distance: f64,
-    color: Color
+    material: Rc<Material>
 }
 
 impl Plane {
-    pub fn new(normal: Vec3, distance: f64, color: Color) -> Plane {
-        Plane {normal: normal, distance: distance, color: color}
+    pub fn new(normal: Vec3, distance: f64, material: Rc<Material>) -> Plane {
+        Plane {normal: normal, distance: distance, material: material}
     }
 }
 
@@ -33,7 +35,7 @@ impl Shape for Plane {
         let t = -(P * N + self.distance) / det;
 
         if t >= 0.0 {
-            Some(Intersection::new((D * D) * t, self.color, P + D * t, N))
+            Some(Intersection::new(t, self.material.clone(), P + D * t, N))
         } else {
             None
         }
@@ -47,14 +49,13 @@ impl Shape for Plane {
         }
     }
 
-    /// Sets the color of the Shape.
-    /// (for now, Shapes are of uniform color.)
-    fn set_color(&mut self, color: Color) {
-        self.color = color;
+    /// Sets the material of the Plane.
+    fn set_material(&mut self, material: Rc<Material>) {
+        self.material = material;
     }
 
-    /// Gets the color of the Shape.
-    fn get_color(&self) -> Color {
-        self.color
+    /// Gets the material of the Plane.
+    fn get_material(&self) -> Rc<Material> {
+        self.material.clone()
     }
 }

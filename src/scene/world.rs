@@ -4,18 +4,21 @@ use geom::Ray;
 use geom::Vec3;
 use shape::Intersection;
 use shape::Shape;
-use shape::PointLight;
+use shape::Light;
+
+const MAX_ITER: i32 = 4;
 
 /// The World struct represents all of the objects in the scene that will be traced by the Camera.
 pub struct World {
     objects: Vec<Box<Shape>>,
-    lights: Vec<Box<PointLight>>
+    lights: Vec<Box<Light>>,
+    bg_color: Color
 }
 
 impl World {
     /// Constructs an empty world.
-    pub fn new() -> World {
-        World {objects: Vec::new(), lights: Vec::new()}
+    pub fn new(bg_color: Color) -> World {
+        World {objects: Vec::new(), lights: Vec::new(), bg_color: bg_color}
     }
 
     /// Adds a shape to the world.
@@ -24,20 +27,20 @@ impl World {
     }
 
     /// Adds a PointLight to the world.
-    pub fn add_light(&mut self, light: Box<PointLight>) {
+    pub fn add_light(&mut self, light: Box<Light>) {
         self.lights.push(light);
     }
 
     /// Returns the closest intersection to a ray.
-    fn get_closest_intersection(&self, ray: &Ray) -> Option<Intersection> {
+    pub fn get_closest_intersection(&self, ray: &Ray) -> Option<Intersection> {
         let mut distance = INFINITY;
         let mut closest: Option<Intersection> = None;
 
         for obj in self.objects.iter() {
             if let Some(intersection) = obj.intersect_first(*ray) {
                 if intersection.distance < distance {
-                    closest = Some(intersection);
                     distance = intersection.distance;
+                    closest = Some(intersection);
                 }
             }
         }
@@ -45,40 +48,39 @@ impl World {
         closest
     }
 
-    pub fn trace_ray(&self, ray: &Ray) -> Color {
+    pub fn trace_ray(&self, ray: &Ray, depth: i32) -> Color {
+        if depth > MAX_ITER {
+            return Color::black();
+        }
+
         let closest = self.get_closest_intersection(ray);
 
         match closest {
             None => {
                 //TODO: background color
-                Color::black()
+                self.bg_color
             },
             Some(intersection) => {
                 // For now, we don't want to use a BDRF...
-                 let mut final_color = Color::black();
+                let mut final_color = self.bg_color;
 
-                 // We add the contributing color of each light
-                 for light in self.lights.iter() {
-                     // We construct a ray from the point of intersection to the light. If it
-                     // intersects an object, we know there is no light getting to the object.
-                     // We use step_epsilon() so the Ray must not intersect from the object it is
-                     // being emitted from. Without it, we have a lot of black-dotted noise.
-                     let L = (light.position - intersection.point).norm();
-                     let shadow_ray = Ray::new(intersection.point, L, false).step_epsilon();
+                // We add the contributing color of each light
+                for light in self.lights.iter() {
+                    if let Some(light_direction) = light.in_shadow(self, &intersection) {
+                        let material_color = self.color(&intersection, &light_direction, depth);
+                        final_color = final_color
+                                    + light.get_color() * material_color;
+                    }
+                }
 
-                     // We use the "if let" matching syntax, but Some(_) tells the compiler that we
-                     // don't actually care about the intersection itself.
-                     if let Some(_) = self.get_closest_intersection(&shadow_ray) {
-                         continue; //skip this light.
-                     }
-
-                     // Matte color BDRF
-                     let intensity = (L * intersection.norm).max(0.0);
-                     final_color = final_color + intersection.color * light.color * intensity;
-                 }
-
-                 final_color
+                final_color
             }
         }
+    }
+
+    pub fn color(&self, intersection: &Intersection, light_direction: &Vec3, depth: i32) -> Color {
+        let ref material = *(intersection.material);
+        let cos = (light_direction.norm() * intersection.norm).max(0.0);
+        material.matte_color * material.matte_intensity * cos
     }
 }

@@ -1,18 +1,20 @@
+use ::Rc;
 use geom::Vec3;
 use geom::Color;
 use geom::Ray;
 use shape::Shape;
 use shape::Intersection;
+use shape::Material;
 
 pub struct Sphere {
     position: Vec3,
     radius: f64,
-    color: Color
+    material: Rc<Material>
 }
 
 impl Sphere {
-    pub fn new(position: Vec3, radius: f64, color: Color) -> Sphere {
-        Sphere {position: position, radius: radius, color: color}
+    pub fn new(position: Vec3, radius: f64, material: Rc<Material>) -> Sphere {
+        Sphere {position: position, radius: radius, material: material}
     }
 
     /// Sets the position of the Sphere.
@@ -36,24 +38,21 @@ impl Shape for Sphere {
         let r = self.radius;
 
         // Borrowed from the CS11 Adv. C++ Lab 3 page.
-        let a = D * D;
         let b = 2.0 * (P * D - D * C);
         let c = P * P + C * C - 2.0 * (P * C) - r * r;
 
-        let t1 = (-b - (b * b - 4.0 * a * c).sqrt())/(2.0 * a);
+        let t1 = (-b - (b * b - 4.0 * c).sqrt()) / 2.0;
         if t1 > 0.0 {
-            let distance = (D * D) * t1;
             let point = P + D * t1;
             let norm = (point - C).norm();
-            return Some(Intersection::new(distance, self.color, point, norm));
+            return Some(Intersection::new(t1, self.material.clone(), point, norm));
         }
 
-        let t2 = (-b + (b * b - 4.0 * a * c).sqrt())/(2.0 * a);
+        let t2 = (-b + (b * b - 4.0 * c).sqrt()) / 2.0;
         if t2 > 0.0 {
-            let distance = (D * D) * t2;
             let point = P + D * t2;
             let norm = (point - C).norm();
-            return Some(Intersection::new(distance, self.color, point, norm));
+            return Some(Intersection::new(t2, self.material.clone(), point, norm));
         }
 
         None // :(
@@ -69,37 +68,36 @@ impl Shape for Sphere {
         let C = self.position;
         let r = self.radius;
 
-        // Borrowed from the CS11 Adv. C++ Lab 3 page.
-        let a = D * D;
+        // Borrowed from the CS11 Adv. C++ Lab 3 page
         let b = 2.0 * (P * D - D * C);
         let c = P * P + C * C - 2.0 * (P * C) - r * r;
 
-        let t1 = (-b - (b * b - 4.0 * a * c).sqrt())/(2.0 * a);
+        let t1 = (-b - (b * b - 4.0 * c).sqrt()) / 2.0;
         if t1 > 0.0 {
             let distance = (D * D) * t1;
             let point = P + D * t1;
             let norm = (point - C).norm();
-            ret.push(Intersection::new(distance, self.color, point, norm));
+            ret.push(Intersection::new(distance, self.material.clone(), point, norm));
         }
 
-        let t2 = (-b + (b * b - 4.0 * a * c).sqrt())/(2.0 * a);
+        let t2 = (-b + (b * b - 4.0 * c).sqrt()) / 2.0;
         if t2 > 0.0 {
             let distance = (D * D) * t2;
             let point = P + D * t2;
             let norm = (point - C).norm();
-            ret.push(Intersection::new(distance, self.color, point, norm));
+            ret.push(Intersection::new(distance, self.material.clone(), point, norm));
         }
 
         ret
     }
 
-    /// Sets the color of the Sphere.
-    fn set_color(&mut self, color: Color) {
-        self.color = color;
+    /// Sets the material of the Sphere.
+    fn set_material(&mut self, material: Rc<Material>) {
+        self.material = material;
     }
 
-    /// Gets the color of the Shape.
-    fn get_color(&self) -> Color {
-        self.color
+    /// Gets the material of the Sphere.
+    fn get_material(&self) -> Rc<Material> {
+        self.material.clone()
     }
 }

@@ -1,17 +1,18 @@
-use geom::vec3::Vec3;
-use geom::color::Color;
+use ::Rc;
+use geom::Vec3;
+use shape::Material;
 
 /// The Intersection struct represents an intersection of a Ray and a Shape object for ray tracing.
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone)]
 pub struct Intersection {
     pub distance: f64,
-    pub color: Color,
-    pub point: Vec3,
+    pub material: Rc<Material>,
+    pub position: Vec3,
     pub norm: Vec3
 }
 
 impl Intersection {
-    pub fn new(distance: f64, color: Color, point: Vec3, norm: Vec3) -> Intersection {
-        Intersection {distance: distance, color: color, point: point, norm: norm}
+    pub fn new(distance: f64, material: Rc<Material>, position: Vec3, norm: Vec3) -> Intersection {
+        Intersection {distance: distance, material: material, position: position, norm: norm}
     }
 }

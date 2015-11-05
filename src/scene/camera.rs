@@ -1,7 +1,11 @@
+use ::rand::{random, Closed01};
 use geom::Vec3;
 use geom::Ray;
+use geom::Color;
 use scene::World;
 use img::Image;
+
+const SAMPLES: i32 = 25;
 
 /// Camera is the central point in the scene from which the rays are emitted.
 ///
@@ -38,12 +42,17 @@ impl Camera {
 
         for x in 0..self.width {
             for y in 0..self.height {
-                // get the ray that intersects a specific pixel
-                let ray = self.get_ray_for_pixel(x, y);
-                // trace the ray to get the color visible through the pixel
-                let color = world.trace_ray(&ray);
-                // save the pixel's color on "film"
-                image.set_color(x, y, color);
+                let mut color = Color::black();
+
+                for _ in 0..SAMPLES {
+                    // get the ray that intersects a specific pixel
+                    let ray = self.get_ray_for_pixel((x as f64) + jitter(), (y as f64) + jitter());
+                    // trace the ray to get the color visible through the pixel
+                    color = color + world.trace_ray(&ray, 0);
+                    // save the pixel's color on "film"
+                }
+
+                image.set_color(x, y, color * (1.0 / (SAMPLES as f64)));
             }
         }
 
@@ -52,14 +61,19 @@ impl Camera {
 
     /// Returns a ray which intersects the 2-dimensional pixel (x, y) on the view plane constructed
     /// from our field of vision.
-    fn get_ray_for_pixel(&self, x: i32, y: i32) -> Ray {
-        assert!(x >= 0 && x < self.width, "Pixel x-coordinate out of bounds!");
-        assert!(y >= 0 && y < self.height, "Pixel y-coordinate out of bounds!");
+    fn get_ray_for_pixel(&self, x: f64, y: f64) -> Ray {
+        assert!(x >= -1.0 && x < (self.width as f64) + 1.0, "Pixel x-coordinate out of bounds!");
+        assert!(y >= -1.0 && y < (self.height as f64) + 1.0, "Pixel y-coordinate out of bounds!");
 
         let pixelDir = self.x * self.distance
-                     + self.z * ((x as f64) / (self.width as f64) - 0.5)
-                     + self.y * (0.5 - (y as f64) / (self.height as f64));
+                     + self.z * (x / (self.width as f64) - 0.5)
+                     + self.y * (0.5 - y / (self.height as f64));
 
-        Ray::new(self.location, pixelDir, true)
+        Ray::new(self.location, pixelDir)
     }
+}
+
+fn jitter() -> f64 {
+    let Closed01(val) = random::<Closed01<f64>>();
+    val
 }

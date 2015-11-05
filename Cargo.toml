@@ -7,3 +7,6 @@ authors = ["Michael Goulet <michael@errs.io>"]
 doc = false
 name = "lux"
 path = "src/main.rs"
+
+[dependencies]
+rand = "*"

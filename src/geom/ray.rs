@@ -23,23 +23,16 @@ impl Ray {
     /// Constructs a ray from an origin, direction vector,
     /// a normalize boolean which normalizes the direction
     /// if true.
-    pub fn new(origin: Vec3, direction: Vec3, normalize: bool) -> Ray {
-        if normalize {
-            Ray {origin: origin, direction: direction.norm()}
-        } else {
-            Ray {origin: origin, direction: direction}
-        }
+    pub fn new(origin: Vec3, direction: Vec3) -> Ray {
+        Ray {origin: origin, direction: direction.norm()}
     }
 
     /// Constructs a ray from  origin and ending  poinst, and
     /// a normalize boolean which normalizes the direction
     /// if true.
-    pub fn between(origin: Vec3, endpoint: Vec3, normalize: bool) -> Ray {
-        if normalize {
-            Ray {origin: origin, direction: (endpoint - origin).norm()}
-        } else {
-            Ray {origin: origin, direction: (endpoint - origin)}
-        }
+    pub fn between(origin: Vec3, endpoint: Vec3) -> Ray {
+        Ray {origin: origin, direction: (endpoint - origin).norm()}
+
     }
 
     /// Constructs a new ray which is "pushed forward" along its direction of movement by a small
