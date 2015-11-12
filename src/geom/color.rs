@@ -73,6 +73,11 @@ impl Color {
         Color {r: 0.0, g: 0.0, b: 0.0}
     }
 
+    /// Constructs a plain white color struct.
+    pub fn white() -> Color {
+        Color {r: 1.0, g: 1.0, b: 1.0}
+    }
+
     /// Clamp will return a copy of a color which has
     /// its components set to 1 if exceeding 1.
     ///

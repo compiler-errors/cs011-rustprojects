@@ -31,6 +31,7 @@ impl Shape for Cylinder {
         let V = self.axis;
         let X = ray.origin - self.start_cap;
 
+        // Cylinder intersection points are solutions to at^2+bt+c=0.
         let a = 1.0 - (D * V).powi(2);
         let b = 2.0 * (D * X - (D * V) * (X * V));
         let c = X * X - (X * V).powi(2) - self.radius.powi(2);
@@ -39,9 +40,10 @@ impl Shape for Cylinder {
         if t1 > 0.0 {
             let m = (D * V) * t1 + X * V;
 
-            if m >= 0.0 && m <= self.height {
+            if m > 0.0 && m < self.height {
                 let point = ray.origin + D * t1;
-                let norm = (point - self.start_cap - V * m).norm();
+                let norm_point = point - self.start_cap;
+                let norm = (norm_point - norm_point.project(V)).norm();
                 return Some(Intersection::new(t1, self.material.clone(), point, norm));
             }
         }
@@ -50,7 +52,7 @@ impl Shape for Cylinder {
         if t2 > 0.0 {
             let m = (D * V) * t2 + X * V;
 
-            if m >= 0.0 && m <= self.height {
+            if m > 0.0 && m < self.height {
                 let point = ray.origin + D * t2;
                 // we define a factor to flip the normal if we are looking in the cylinder from
                 // within the cap hole. Otherwise, the cylinder is completely black inside.
@@ -59,40 +61,6 @@ impl Shape for Cylinder {
                 return Some(Intersection::new(t2, self.material.clone(), point, norm));
             }
         }
-
-        //check if the point intersects with any of the end-caps.
-        /*TODO: Fix, maybe replace with disk intersection code.
-        if t1 > 0.0 || t2 > 0.0 {
-            let mut tbest = INFINITY;
-            let mut ibest: Option<Intersection> = None;
-
-            let Vp = -V;
-            let det1 = D * Vp;
-
-            if (det1 != 0.0) {
-                let t = -X * Vp / det1;
-
-                if t >= 0.0 {
-                    tbest = t;
-                    ibest = Some(Intersection::new(t, self.material.clone(), ray.origin + D * t,
-                                Vp));
-                }
-            }
-
-            //let X2 = ray.origin - (self.start_cap + V * self.height);
-            //let det2 = D * V;
-
-            //if (det2 != 0.0) {
-            //    let t = -X2 * V / det2;
-
-            //    if t >= 0.0 && t < tbest {
-            //        return Some(Intersection::new(t, self.material.clone(), ray.origin + D * t,
-            //                    V));
-            //    }
-            //}
-
-            return ibest;
-        }*/
 
         None // :(
     }
@@ -105,6 +73,7 @@ impl Shape for Cylinder {
         let V = self.axis;
         let X = ray.origin - self.start_cap;
 
+        // Cylinder intersection points are solutions to at^2+bt+c=0.
         let a = 1.0 - (D * V).powi(2);
         let b = 2.0 * (D * X - (D * V) * (X * V));
         let c = X * X - (X * V).powi(2) - self.radius.powi(2);
@@ -113,22 +82,11 @@ impl Shape for Cylinder {
         if t1 > 0.0 {
             let m = (D * V) * t1 + X * V;
 
-            if m >= 0.0 && m <= self.height {
+            if m > 0.0 && m < self.height {
                 let point = ray.origin + D * t1;
-                let norm = (point - self.start_cap - V * m).norm();
+                let norm_point = point - self.start_cap;
+                let norm = (norm_point - norm_point.project(V)).norm();
                 vec.push(Intersection::new(t1, self.material.clone(), point, norm));
-            } else { //TODO: "else if capped"
-                let Vp = -V;
-                let det = D * Vp;
-
-                if (det != 0.0) {
-                    let t = -X * Vp / det;
-
-                    if t >= 0.0 {
-                        vec.push(Intersection::new(t, self.material.clone(), ray.origin + D * t,
-                                 Vp));
-                    }
-                }
             }
         }
 
@@ -136,22 +94,13 @@ impl Shape for Cylinder {
         if t2 > 0.0 {
             let m = (D * V) * t2 + X * V;
 
-            if m >= 0.0 && m <= self.height {
+            if m > 0.0 && m < self.height {
                 let point = ray.origin + D * t2;
-                let norm = (point - self.start_cap - V * m).norm();
+                // we define a factor to flip the normal if we are looking in the cylinder from
+                // within the cap hole. Otherwise, the cylinder is completely black inside.
+                let flip = if t1 > 0.0 { -1.0 } else { 1.0 };
+                let norm = (point - self.start_cap - V * m).norm() * flip;
                 vec.push(Intersection::new(t2, self.material.clone(), point, norm));
-            } else { //TODO: "else if capped"
-                let X2 = ray.origin - (self.start_cap + V * self.height);
-                let det = D * V;
-
-                if (det != 0.0) {
-                    let t = -X2 * V / det;
-
-                    if t >= 0.0 {
-                        vec.push(Intersection::new(t, self.material.clone(), ray.origin + D * t,
-                                 V));
-                    }
-                }
             }
         }
 

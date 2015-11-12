@@ -5,7 +5,7 @@ use geom::Color;
 use scene::World;
 use img::Image;
 
-const SAMPLES: i32 = 4;
+const SAMPLES: i32 = 400;
 
 /// Camera is the central point in the scene from which the rays are emitted.
 ///
@@ -54,6 +54,8 @@ impl Camera {
 
                 image.set_color(x, y, color * (1.0 / (SAMPLES as f64)));
             }
+            print!("{}% done!\n", (x as f64) /
+                    (self.width as f64) * 100.0);
         }
 
         image
@@ -73,6 +75,7 @@ impl Camera {
     }
 }
 
+/// A helper method which returns a random real on [0, 1].
 fn jitter() -> f64 {
     let Closed01(val) = random::<Closed01<f64>>();
     val
