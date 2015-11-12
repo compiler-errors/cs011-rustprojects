@@ -5,7 +5,7 @@ use geom::Color;
 use scene::World;
 use img::Image;
 
-const SAMPLES: i32 = 400;
+const SAMPLES: i32 = 1000;
 
 /// Camera is the central point in the scene from which the rays are emitted.
 ///
@@ -67,11 +67,11 @@ impl Camera {
         assert!(x >= -1.0 && x < (self.width as f64) + 1.0, "Pixel x-coordinate out of bounds!");
         assert!(y >= -1.0 && y < (self.height as f64) + 1.0, "Pixel y-coordinate out of bounds!");
 
-        let pixelDir = self.x * self.distance
+        let pixel_dir = self.x * self.distance
                      + self.z * (x / (self.width as f64) - 0.5)
                      + self.y * (0.5 - y / (self.height as f64));
 
-        Ray::new(self.location, pixelDir)
+        Ray::new(self.location, pixel_dir)
     }
 }
 

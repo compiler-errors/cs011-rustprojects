@@ -16,10 +16,12 @@ impl Material {
             glossy_color: glossy_color}
     }
 
+    // Returns a new "matte" material (100% matte_intensity).
     pub fn lambertian(color: Color) -> Material {
         Material::new(1.0, color, 0.0, 0.0, Color::black())
     }
 
+    // Returns a new reflective color
     pub fn reflective(color: Color) -> Material {
         Material::new(0.1, Color::black(), 0.9, -1.0, color)
     }

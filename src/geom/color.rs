@@ -87,7 +87,7 @@ impl Color {
     /// outputted to any image.
     pub fn clamp(self) -> Color {
         Color {r: if self.r <= 1.0 {self.r} else {1.0},
-               g: if self.r <= 1.0 {self.g} else {1.0},
-               b: if self.r <= 1.0 {self.b} else {1.0}}
+               g: if self.g <= 1.0 {self.g} else {1.0},
+               b: if self.b <= 1.0 {self.b} else {1.0}}
     }
 }

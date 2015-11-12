@@ -1,6 +1,5 @@
 use ::Rc;
 use shape::Intersection;
-use geom::Vec3;
 use shape::Material;
 use geom::Ray;
 

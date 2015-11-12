@@ -1,7 +1,5 @@
 use ::Rc;
-use std::f64::INFINITY;
 use geom::Vec3;
-use geom::Color;
 use geom::Ray;
 use shape::Shape;
 use shape::Intersection;
