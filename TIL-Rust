@@ -101,3 +101,27 @@ Earlier
   It's a really cool feature, because it allows us to do a lot of creative
   things. I'm not exactly sure how it could be used in the best ways, but it
   certainly opens a lot of doors.
+
+10/19
+  * I have found (or at least, it's my opinion that) multithreading is very
+  difficult to introduce into a single-threaded project in Rust. The memory
+  model is very unforgiving with passing memory and "borrowing" from multiple
+  threads. For example, in this project, the scene data is created once, then
+  essentially never touched again afterwards; this means that all threads should
+  theoretically be able to access the memory and safely read and cache the data
+  between CPU cores. However, Rust requires the memory to be wrapped in a very
+  complex set of mutices, and accessed in a very limited way.
+  The main problem with memory management in a multithreaded situation is that
+  there is a lifetime problem -- Rust cannot be conscious of the amount of time
+  that the Thread lives, so if many threads have references to the same memory,
+  there's a problem when Rust doesn't "trust" that all of the Threads will join
+  before the end of the lifetime of the original owner of the Mutex.
+    With more time, maybe I could fix it with some type of weak reference.
+    Though rust might make give the usage of the weak reference too much
+    overhead for any benefit.
+  * Profiling in Rust is much harder than C/C++. There are many helper methods
+  due to the core crate in Rust, and a lot of actions in Rust which seem like
+  "syntax" are expanded into trampoline methods, helper methods, etc.
+  The Rust compiler does in fact export gdb debug symbols ("-g" on the gcc
+  toolchain), so it is possible to run profiler tools such as Valgrind and GDB
+  on Rust.
