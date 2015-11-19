@@ -1,3 +1,4 @@
+use ::Rc;
 use std::f64::INFINITY;
 use geom::Color;
 use geom::Ray;
@@ -7,7 +8,7 @@ use shape::Shape;
 use shape::Light;
 
 /// The maximum recursive iterations that can be attained by the tracer.
-const MAX_ITER: i32 = 4;
+const MAX_ITER: i32 = 6;
 
 /// The World struct represents all of the objects in the scene that will be traced by the Camera.
 pub struct World {
@@ -75,6 +76,7 @@ impl World {
 
                 final_color + self.refl_color(&intersection, ray, depth)
                             + self.bg_color(&intersection, ray, depth)
+                            + self.trans_color(&intersection, ray, depth)
             }
         }
     }
@@ -83,16 +85,23 @@ impl World {
     pub fn light_color(&self, intersection: &Intersection, ray: &Ray, light_direction: &Vec3)
                        -> Color {
         // We can get a temporary (borrowed) reference to the material by the "ref" keyword
-        let ref material = *(intersection.material);
+        let ref material = *intersection.material;
 
         // We calculate the Lambertian BRDF by taking the cosine of the light and the normal
         let cos = (light_direction.norm() * intersection.norm).max(0.0);
         let matte_illum = material.matte_color * material.matte_intensity * cos;
 
-        let Dr = ray.direction + (-ray.direction).project(intersection.norm) * 2.0;
+        let Dr = -*light_direction + (*light_direction).project(intersection.norm) * 2.0;
+
+        let gloss = if material.glossy_power == -1.0 { 10000.0 } else { material.glossy_power };
+
         let spec_illum = material.glossy_color *
-                         (Dr * -ray.direction).max(0.0).powf(material.glossy_power) *
-                         material.glossy_intensity;
+                         (Dr * -ray.direction).max(0.0).powf(gloss) *
+                         //TODO: fix when glossy_power == -1.
+                         material.glossy_intensity
+                       + material.trans_color *
+                         (Dr * -ray.direction).max(0.0).powi(10000) *
+                         material.trans_intensity;
 
         matte_illum + spec_illum
     }
@@ -100,7 +109,7 @@ impl World {
     /// Returns the color due to specular reflection from other objects.
     pub fn refl_color(&self, intersection: &Intersection, ray: &Ray, depth: i32) -> Color {
         // We can get a temporary (borrowed) reference to the material by the "ref" keyword
-        let ref material = *(intersection.material);
+        let ref material = *intersection.material;
 
         // If there is no glossy intensity, then quit early.
         if material.glossy_intensity == 0.0 {
@@ -143,10 +152,67 @@ impl World {
         }
     }
 
-    // Returns the color due to diffuse reflection from other objects
+    pub fn trans_color(&self, intersection: &Intersection, ray: &Ray, depth: i32) -> Color {
+        // We can get a temporary (borrowed) reference to the material by the "ref" keyword
+        let ref material = *intersection.material;
+
+        // If there is no transmissive intensity, then quit early.
+        if material.trans_intensity == 0.0 {
+            return Color::black();
+        }
+
+        // Calculate ray that represents a perfect reflection
+        let perfect_reflect = (ray.direction + (-ray.direction).project(intersection.norm)
+                               * 2.0).norm();
+        let reflected_ray = Ray::new(intersection.position, perfect_reflect).step_epsilon();
+
+        //if self.tir(intersection, ray) {
+        //        material.trans_color * self.trace_ray(&reflected_ray, depth+1)
+        //} else {
+            let cos_theta = -(intersection.norm * ray.direction);
+
+            if cos_theta > 0.0 {
+                let eta = material.trans_eta;
+                let angle = cos_theta;
+                let norm = intersection.norm;
+
+                let angle2 = (1.0 - (1.0 - angle * angle) / (eta * eta)).sqrt();
+                let wt = ray.direction / eta - norm * (angle2 - angle / eta);
+
+                let transmitted_ray = Ray::new(intersection.position, wt).step_epsilon();
+
+                material.trans_color * self.trace_ray(&transmitted_ray, depth+1)
+                                     * material.trans_intensity
+                                     * (1.0 / (eta * eta))
+            } else {
+                let eta = 1.0 / material.trans_eta;
+                let angle = -cos_theta;
+                let norm = -intersection.norm;
+
+                let angle2 = (1.0 - (1.0 - angle * angle) / (eta * eta)).sqrt();
+                let wt = ray.direction / eta - norm * (angle2 - angle / eta);
+
+                let transmitted_ray = Ray::new(intersection.position, wt).step_epsilon();
+
+                material.trans_color * self.trace_ray(&transmitted_ray, depth+1)
+                                     * material.trans_intensity
+                                     * (1.0 / (eta * eta))
+        //    }
+        }
+    }
+
+    /// Checks whether there is total internal reflection
+    fn tir(&self, intersection: &Intersection, ray: &Ray) -> bool {
+        let ref material = *intersection.material;
+        let cos_theta = -(intersection.norm * ray.direction);
+        let eta = if cos_theta >= 0.0 { material.trans_eta } else { 1.0 / material.trans_eta };
+
+        return 1.0 - (1.0 - cos_theta * cos_theta) / (eta * eta) < 0.0;
+    }
+
+    /// Returns the color due to diffuse reflection from other objects
     pub fn bg_color(&self, intersection: &Intersection, ray: &Ray, depth: i32) -> Color {
-        let ref material = *(intersection.material);
-        let mut color = Color::black();
+        let ref material = *intersection.material;
 
         // We can quit early if there's no matte_intensity
         if material.matte_intensity == 0.0 {
@@ -168,6 +234,12 @@ impl World {
         // light.
         let cos = (shadow_direction.norm() * intersection.norm).max(0.0);
 
-        shadow_color * material.matte_color * material.matte_intensity * cos
+        let color = shadow_color * material.matte_color * material.matte_intensity * cos;
+
+        if color.b > 0.1 {
+            print!("{}, {}, {}, {}, {}", color, shadow_color, material.matte_color, material.matte_intensity, cos);
+        }
+
+        color
     }
 }

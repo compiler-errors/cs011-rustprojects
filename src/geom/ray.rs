@@ -1,7 +1,7 @@
 use std::fmt;
 use geom::vec3::Vec3;
 
-const EPSILON: f64 = 1.0e-6;
+const EPSILON: f64 = 3.0e-7;
 
 /// Ray implements a physical ray in a 3d space for
 /// the ray tracer. It consists of a point and a
@@ -38,6 +38,6 @@ impl Ray {
     /// Constructs a new ray which is "pushed forward" along its direction of movement by a small
     /// epsilon.
     pub fn step_epsilon(&self) -> Ray {
-        Ray {origin: self.origin + self.direction.norm() * EPSILON, direction: self.direction}
+        Ray {origin: self.origin + self.direction * EPSILON, direction: self.direction}
     }
 }
