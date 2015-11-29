@@ -1,7 +1,7 @@
 use std::ops::*;
 use std::fmt;
 use std::f64::consts::PI;
-use ::rand::{random, Closed01};
+use ::rand::{Rng, thread_rng};
 
 /// Vec3 is the 3-dimensional vector struct that will handle
 /// most of the geometry in Lux.
@@ -152,6 +152,5 @@ impl Neg for Vec3 {
 ///
 /// I feel bad for copying code.
 fn jitter() -> f64 {
-    let Closed01(val) = random::<Closed01<f64>>();
-    val
+    thread_rng().next_f64()
 }

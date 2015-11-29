@@ -1,12 +1,12 @@
 [package]
-name = "lux"
+name = "test"
 version = "0.1.0"
 authors = ["Michael Goulet <michael@errs.io>"]
 
 [[bin]]
 doc = false
-name = "lux"
-path = "src/main.rs"
+name = "test"
+path = "main.rs"
 
 [dependencies]
-rand = "*"
+crossbeam = "0.1.5"

@@ -1,4 +1,4 @@
-use ::Rc;
+use ::Arc;
 use shape::Intersection;
 use shape::Material;
 use geom::Ray;
@@ -8,7 +8,7 @@ use geom::Ray;
 
 /// The methods within the trait have to do mostly with intersection calculation, but also define
 /// the Shape's color and position too.
-pub trait Shape {
+pub trait Shape : Send + Sync {
     /// Returns the first, closest intersection of a Ray and the Shape, or None if there are no
     /// intersections.
     fn intersect_first(&self, ray: Ray) -> Option<Intersection>;
@@ -17,8 +17,8 @@ pub trait Shape {
     fn intersect_all(&self, ray: Ray) -> Vec<Intersection>;
 
     /// Sets the material of the Shape.
-    fn set_material(&mut self, material: Rc<Material>);
+    fn set_material(&mut self, material: Arc<Material>);
 
     /// Gets the material of the Shape.
-    fn get_material(&self) -> Rc<Material>;
+    fn get_material(&self) -> Arc<Material>;
 }

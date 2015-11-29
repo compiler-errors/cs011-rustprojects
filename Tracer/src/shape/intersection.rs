@@ -1,4 +1,4 @@
-use ::Rc;
+use ::Arc;
 use geom::Vec3;
 use shape::Material;
 
@@ -6,13 +6,13 @@ use shape::Material;
 #[derive(Clone)]
 pub struct Intersection {
     pub distance: f64,
-    pub material: Rc<Material>,
+    pub material: Arc<Material>,
     pub position: Vec3,
     pub norm: Vec3
 }
 
 impl Intersection {
-    pub fn new(distance: f64, material: Rc<Material>, position: Vec3, norm: Vec3) -> Intersection {
+    pub fn new(distance: f64, material: Arc<Material>, position: Vec3, norm: Vec3) -> Intersection {
         Intersection {distance: distance, material: material, position: position, norm: norm}
     }
 }

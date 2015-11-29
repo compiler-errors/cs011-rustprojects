@@ -1,4 +1,4 @@
-use ::Rc;
+use ::Arc;
 use geom::Vec3;
 use geom::Color;
 use geom::Ray;
@@ -9,11 +9,11 @@ use shape::Material;
 pub struct Plane {
     normal: Vec3,
     distance: f64,
-    material: Rc<Material>
+    material: Arc<Material>
 }
 
 impl Plane {
-    pub fn new(normal: Vec3, distance: f64, material: Rc<Material>) -> Plane {
+    pub fn new(normal: Vec3, distance: f64, material: Arc<Material>) -> Plane {
         Plane {normal: normal, distance: distance, material: material}
     }
 }
@@ -50,12 +50,12 @@ impl Shape for Plane {
     }
 
     /// Sets the material of the Plane.
-    fn set_material(&mut self, material: Rc<Material>) {
+    fn set_material(&mut self, material: Arc<Material>) {
         self.material = material;
     }
 
     /// Gets the material of the Plane.
-    fn get_material(&self) -> Rc<Material> {
+    fn get_material(&self) -> Arc<Material> {
         self.material.clone()
     }
 }

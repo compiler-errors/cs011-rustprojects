@@ -1,4 +1,4 @@
-use ::Rc;
+use ::Arc;
 use geom::Vec3;
 use geom::Ray;
 use shape::Shape;
@@ -8,11 +8,11 @@ use shape::Material;
 pub struct Sphere {
     position: Vec3,
     radius: f64,
-    material: Rc<Material>
+    material: Arc<Material>
 }
 
 impl Sphere {
-    pub fn new(position: Vec3, radius: f64, material: Rc<Material>) -> Sphere {
+    pub fn new(position: Vec3, radius: f64, material: Arc<Material>) -> Sphere {
         Sphere {position: position, radius: radius, material: material}
     }
 
@@ -91,12 +91,12 @@ impl Shape for Sphere {
     }
 
     /// Sets the material of the Sphere.
-    fn set_material(&mut self, material: Rc<Material>) {
+    fn set_material(&mut self, material: Arc<Material>) {
         self.material = material;
     }
 
     /// Gets the material of the Sphere.
-    fn get_material(&self) -> Rc<Material> {
+    fn get_material(&self) -> Arc<Material> {
         self.material.clone()
     }
 }

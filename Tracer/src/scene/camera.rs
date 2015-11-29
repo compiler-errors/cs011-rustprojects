@@ -1,4 +1,5 @@
-use ::rand::{random, Closed01};
+use ::rand::{Rng, thread_rng};
+use ::scope;
 use geom::Vec3;
 use geom::Ray;
 use geom::Color;
@@ -40,23 +41,48 @@ impl Camera {
     pub fn trace_image(&self, world: &World) -> Image {
         let mut image = Image::new(self.width, self.height);
 
-        for x in 0..self.width {
-            for y in 0..self.height {
-                let mut color = Color::black();
+        scope(|scope| {
+            let mut futures = Vec::new();
+            futures.reserve((self.width * self.height) as usize);
 
-                for _ in 0..SAMPLES {
-                    // get the ray that intersects a specific pixel
-                    let ray = self.get_ray_for_pixel((x as f64) + jitter(), (y as f64) + jitter());
-                    // trace the ray to get the color visible through the pixel
-                    color = color + world.trace_ray(&ray, 0);
-                    // save the pixel's color on "film"
+            for x in 0..self.width {
+                for y in 0..self.height {
+                    let thread = scope.spawn(move || {
+                        let mut color = Color::black();
+
+                        for _ in 0..SAMPLES {
+                            // get the ray that intersects a specific pixel
+                            let ray = self.get_ray_for_pixel((x as f64) + jitter(), (y as f64) + jitter());
+                            // trace the ray to get the color visible through the pixel
+                            color = color + world.trace_ray(&ray, 0);
+                            // save the pixel's color on "film"
+                        }
+
+                        color
+                    });
+
+                    futures.push(thread);
                 }
-
-                image.set_color(x, y, color * (1.0 / (SAMPLES as f64)));
+                println!("{}% instantiated!", (x as f64) /
+                        (self.width as f64) * 100.0);
             }
-            print!("{}% done!\n", (x as f64) /
-                    (self.width as f64) * 100.0);
-        }
+
+            for x in (0..self.width).rev() {
+                for y in (0..self.height).rev() {
+                    let thread_option = futures.pop();
+
+                    let color: Color = if let Some(thread) = thread_option {
+                        thread.join()
+                    } else {
+                        panic!("Ran out of threads in the vec. Mismatched sizes?");
+                    };
+
+                    image.set_color(x, y, color * (1.0 / (SAMPLES as f64)));
+                }
+                println!("{}% done!", (x as f64) /
+                        (self.width as f64) * 100.0);
+            }
+        });
 
         image
     }
@@ -75,8 +101,7 @@ impl Camera {
     }
 }
 
-/// A helper method which returns a random real on [0, 1].
+/// A helper method which returns a random real on [0, 1).
 fn jitter() -> f64 {
-    let Closed01(val) = random::<Closed01<f64>>();
-    val
+    thread_rng().next_f64()
 }

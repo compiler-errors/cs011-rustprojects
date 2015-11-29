@@ -1,4 +1,4 @@
-use ::Rc;
+use ::Arc;
 use std::f64::INFINITY;
 use geom::Color;
 use geom::Ray;
@@ -12,8 +12,8 @@ const MAX_ITER: i32 = 6;
 
 /// The World struct represents all of the objects in the scene that will be traced by the Camera.
 pub struct World {
-    objects: Vec<Box<Shape>>,
-    lights: Vec<Box<Light>>,
+    objects: Vec<Arc<Shape>>,
+    lights: Vec<Arc<Light>>,
     bg_color: Color
 }
 
@@ -24,12 +24,12 @@ impl World {
     }
 
     /// Adds a shape to the world.
-    pub fn add_shape(&mut self, shape: Box<Shape>) {
+    pub fn add_shape(&mut self, shape: Arc<Shape>) {
         self.objects.push(shape);
     }
 
     /// Adds a PointLight to the world.
-    pub fn add_light(&mut self, light: Box<Light>) {
+    pub fn add_light(&mut self, light: Arc<Light>) {
         self.lights.push(light);
     }
 
@@ -74,9 +74,15 @@ impl World {
                     }
                 }
 
-                final_color + self.refl_color(&intersection, ray, depth)
+                let color = final_color + self.refl_color(&intersection, ray, depth)
                             + self.bg_color(&intersection, ray, depth)
-                            + self.trans_color(&intersection, ray, depth)
+                            + self.trans_color(&intersection, ray, depth);
+
+                if color.b < 0.0 {
+                    print!("{}, {}", intersection.position, depth);
+                }
+
+                color
             }
         }
     }
@@ -97,7 +103,6 @@ impl World {
 
         let spec_illum = material.glossy_color *
                          (Dr * -ray.direction).max(0.0).powf(gloss) *
-                         //TODO: fix when glossy_power == -1.
                          material.glossy_intensity
                        + material.trans_color *
                          (Dr * -ray.direction).max(0.0).powi(10000) *
@@ -234,12 +239,6 @@ impl World {
         // light.
         let cos = (shadow_direction.norm() * intersection.norm).max(0.0);
 
-        let color = shadow_color * material.matte_color * material.matte_intensity * cos;
-
-        if color.b > 0.1 {
-            print!("{}, {}, {}, {}, {}", color, shadow_color, material.matte_color, material.matte_intensity, cos);
-        }
-
-        color
+        shadow_color * material.matte_color * material.matte_intensity * cos
     }
 }

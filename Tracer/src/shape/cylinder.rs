@@ -1,4 +1,4 @@
-use ::Rc;
+use ::Arc;
 use geom::Vec3;
 use geom::Ray;
 use shape::Shape;
@@ -10,11 +10,11 @@ pub struct Cylinder {
     axis: Vec3,
     radius: f64,
     height: f64,
-    material: Rc<Material>
+    material: Arc<Material>
 }
 
 impl Cylinder {
-    pub fn new(start_cap: Vec3, axis: Vec3, radius: f64, height: f64, material: Rc<Material>) ->
+    pub fn new(start_cap: Vec3, axis: Vec3, radius: f64, height: f64, material: Arc<Material>) ->
            Cylinder {
         Cylinder {start_cap: start_cap, axis: axis.norm(), radius: radius,
                   height: height, material: material}
@@ -106,12 +106,12 @@ impl Shape for Cylinder {
     }
 
     /// Sets the material of the Shape.
-    fn set_material(&mut self, material: Rc<Material>) {
+    fn set_material(&mut self, material: Arc<Material>) {
         self.material = material;
     }
 
     /// Gets the material of the Shape.
-    fn get_material(&self) -> Rc<Material> {
+    fn get_material(&self) -> Arc<Material> {
         self.material.clone()
     }
 }

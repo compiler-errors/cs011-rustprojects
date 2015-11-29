@@ -1,5 +1,6 @@
 use std::io::prelude::*;
 use std::fs::File;
+use std::sync::Mutex;
 
 use geom::color::Color;
 
@@ -7,7 +8,7 @@ use geom::color::Color;
 pub struct Image {
     width: i32,
     height: i32,
-    image: Vec<Vec<Color>>
+    image_lock: Mutex<Vec<Vec<Color>>>
 }
 
 impl Image {
@@ -34,15 +35,20 @@ impl Image {
             buffer.push(row);
         }
 
-        Image {width: width, height: height, image: buffer}
+        Image {width: width, height: height, image_lock: Mutex::new(buffer)}
     }
 
     /// Replaces the color at (x, y) with the new color provided
     pub fn set_color(&mut self, x: i32, y: i32, color: Color) {
-        assert!(x >= 0 && x < self.width, "x out of bounds!");
-        assert!(y >= 0 && y < self.height, "y out of bounds!");
+        let image_guard = self.image_lock.lock();
 
-        self.image[x as usize][y as usize] = color;
+        if let Ok(mut image) = image_guard {
+
+            assert!(x >= 0 && x < self.width, "x out of bounds!");
+            assert!(y >= 0 && y < self.height, "y out of bounds!");
+
+            image[x as usize][y as usize] = color;
+        } //TODO: else panic?
     }
 
     /// Save the image struct as a ppm (portable bitmap) image file.
@@ -50,23 +56,27 @@ impl Image {
     /// The file is saved as the filename parameter, without the .ppm
     /// file extension added onto the end.
     pub fn save(&self, filename: &str) {
-        //TODO: using unwrap is bad.
-        //TODO: check for file extension?
-        let mut file = File::create(filename).unwrap();
-        write!(file, "P3\n").unwrap();
-        write!(file, "{} {}\n", self.width, self.height).unwrap();
-        write!(file, "255\n").unwrap();
+        let image_guard = self.image_lock.lock();
 
-        for y in 0..self.height {
-            for x in 0..self.width {
-                //the i32 value for x and y need to be cast to usize
-                let color = self.image[x as usize][y as usize].clamp();
-                let r = (color.r * 255.0) as i32;
-                let g = (color.g * 255.0) as i32;
-                let b = (color.b * 255.0) as i32;
-                write!(file, "{} {} {} ", r, g, b).unwrap();
+        if let Ok(image) = image_guard {
+            //TODO: using unwrap is bad.
+            //TODO: check for file extension?
+            let mut file = File::create(filename).unwrap();
+            write!(file, "P3\n").unwrap();
+            write!(file, "{} {}\n", self.width, self.height).unwrap();
+            write!(file, "255\n").unwrap();
+
+            for y in 0..self.height {
+                for x in 0..self.width {
+                    //the i32 value for x and y need to be cast to usize
+                    let color = image[x as usize][y as usize].clamp();
+                    let r = (color.r * 255.0) as i32;
+                    let g = (color.g * 255.0) as i32;
+                    let b = (color.b * 255.0) as i32;
+                    write!(file, "{} {} {} ", r, g, b).unwrap();
+                }
+                write!(file, "\n").unwrap();
             }
-            write!(file, "\n").unwrap();
-        }
+        } //TODO: else panic?
     }
 }
